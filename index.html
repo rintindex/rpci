@@ -112,6 +112,8 @@
   const RPCI_DATES = ["2026-07-01","2026-07-02","2026-07-03","2026-07-04","2026-07-05","2026-07-06","2026-07-07","2026-07-08","2026-07-09","2026-07-10","2026-07-11","2026-07-12","2026-07-13"];
   const RPCI_VALUES = [1000,994.32,993.66,989.95,997.1,1018.04,1033.12,1048.68,1061.25,1077.87,1086.36,1095.88,1099.07];
   const RPCI_BASE = 1000;
+  // 横轴局促策略：①隐藏年份(MM-DD) ②倾斜 ③重叠时隐藏部分(hideOverlappingLabels)
+  const RPCI_DATES_SHORT = RPCI_DATES.map(function (d) { return d.slice(5); });
   new ApexCharts(document.querySelector("#rpciChart"), {
     chart: {
       type: "area",
@@ -132,8 +134,14 @@
     grid: { borderColor: "#e2e8f0", strokeDashArray: 3, padding: { left: 8, right: 12 } },
     markers: { size: 0, hover: { size: 4 } },
     xaxis: {
-      categories: RPCI_DATES,
-      labels: { style: { colors: "#64748b", fontSize: "11px" }, rotate: 0, hideOverlappingLabels: true },
+      categories: RPCI_DATES_SHORT,
+      labels: {
+        style: { colors: "#64748b", fontSize: "11px" },
+        rotate: -40,
+        rotateAlways: true,
+        hideOverlappingLabels: true,
+        offsetY: 6
+      },
       axisBorder: { show: false },
       axisTicks: { show: false }
     },
@@ -142,8 +150,15 @@
       forceNiceScale: true
     },
     tooltip: {
-      x: { format: undefined },
-      y: { formatter: function (v) { return v.toFixed(2); } }
+      custom: function (opts) {
+        var i = opts.dataPointIndex;
+        var d = RPCI_DATES[i];
+        var v = RPCI_VALUES[i];
+        return '<div style="padding:6px 10px;">' +
+          '<div style="color:#64748b;font-size:11px;">' + d + '</div>' +
+          '<div style="font-weight:700;font-size:14px;">' + (v == null ? '' : v.toFixed(2)) + '</div>' +
+          '</div>';
+      }
     },
     annotations: {
       yaxis: [{
